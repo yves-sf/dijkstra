@@ -49,7 +49,7 @@ RSpec.describe Graph do
     end
   end
 
-  describe "Graph" do
+  describe "#set_graph" do
     let!(:graph) {Graph.new sample_data}
 
     before do
@@ -79,7 +79,6 @@ RSpec.describe Graph do
 
 
   def sample_data
-    # debugger
     %w(A,B,1 A,C,2 B,C,3 B,D,3 C,D,1 B,E,2 D,F,3 D,E,3 E,G,3 F,G,1)
   end
 
