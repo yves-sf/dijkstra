@@ -3,6 +3,7 @@ require_relative './dijkstra/graph'
 require_relative './dijkstra/edge'
 require_relative './dijkstra/node'
 require "set"
+require "byebug"
 
 module Dijkstra
 
@@ -114,5 +115,7 @@ class Dij
   include Dijkstra
 end
 
-Dij.new.process "./data/my_graph.txt", "A", "G"
 
+if __FILE__ == $0
+  Dij.new.process ARGV[0], ARGV[1], ARGV[2]
+end
