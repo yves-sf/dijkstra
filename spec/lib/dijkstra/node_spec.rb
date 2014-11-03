@@ -16,9 +16,40 @@ RSpec.describe Node do
     it {expect(valid_node.name).to eq "A"}
     it {expect(valid_node.infinity).to eq infinity}
     it {expect(valid_node.weight).to eq infinity}
-    it {expect(valid_node.visited).to be false}
+    it {expect(valid_node.weight_from).to eq ""}
     it {expect(valid_node.connections).to eq []}
   end
+
+  describe "#set_weight" do
+    before do
+      expect(node_b.weight).to eq infinity
+      expect(node_b.weight_from).to eq ""
+      node_b.set_weight node_a, 10
+    end
+
+    it {expect(node_b.weight).to eq 10}
+    it {expect(node_b.weight_from).to eq "A"}
+  end
+
+  describe "#weight_less?" do
+    context "weight is infinite" do
+      it {expect(node_b.weight_less?(10)).to be true}
+    end
+    context "weight was already set" do
+      before {node_b.set_weight node_a, 10}
+      it {expect(node_b.weight_less?(8)).to be true}
+      it {expect(node_b.weight_less?(15)).to be false}
+    end
+  end
+
+  describe "#calc_weight" do
+    before do
+      node_a.weight = 0
+      Node.add_relations node_a, node_b, 3
+    end
+    it {expect(node_a.calc_weight "B").to eq 3}
+  end
+
 
   describe "relations" do
     context "for a node" do

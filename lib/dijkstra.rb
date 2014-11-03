@@ -1,18 +1,18 @@
-require 'dijkstra/version'
-require 'dijkstra/graph'
-require 'dijkstra/edge'
-require 'dijkstra/node'
-
+require_relative './dijkstra/version'
+require_relative './dijkstra/graph'
+require_relative './dijkstra/edge'
+require_relative './dijkstra/node'
 require "set"
-
 
 module Dijkstra
 
-  def process(start=nil, stop=nil)
+  def process(file="./data/my_graph.txt", start=nil, stop=nil)
     return unless start && stop
-    set_start_node_weight(start)
-
-
+    graph file
+    set_not_visited graph.nodes
+    set_start_node start
+    navigate start
+    $stdout << (format_response file, start, stop)
   end
 
   def load_data(file="./data/my_graph.txt")
@@ -22,16 +22,61 @@ module Dijkstra
     edges
   end
 
-  def graph(file="./data/my_graph.txt")
+  def graph(file=nil)
     @graph ||= Graph.new load_data(file)
   end
 
-  def set_start_node_weight(start)
-    graph.nodes[start].weight = 0
+  def set_not_visited(nodes)
+    nodes.each {|_k, node| not_visited << node}
   end
 
-  def set_weight(node, distance)
+  def set_start_node(start)
+    node = graph.nodes[start]
+    node.weight = 0
+    node.weight_from = node.name
+    swap_visited node
+  end
 
+  def lowest_targets(node_name)
+    node = graph.nodes[node_name]
+    lowest = node.infinity
+    lowest_node = node
+    not_visited.each do |nv|
+      nv.set_weight(node, node.calc_weight(nv.name))
+      if nv.weight < lowest
+        lowest = nv.weight
+        lowest_node = nv
+      end
+    end
+    lowest_node
+  end
+
+  def navigate(node_name)
+    new_visited = lowest_targets(node_name)
+    swap_visited new_visited
+    navigate(new_visited.name) unless not_visited.empty?
+    new_visited
+  end
+
+  def format_response(file="", start="A", stop="G")
+    build_path stop, start
+    "Dijkstra #{file} #{start} #{stop} Shortest path is [#{path[0..-2]}] with total cost #{total_cost(stop)}\n"
+  end
+
+  def build_path(node_name, start)
+    path node_name
+    return if node_name == start
+    build_path graph.nodes[node_name].weight_from, start unless node_name == start
+  end
+
+  def path(node_name=nil)
+    @path ||= ""
+    @path.insert(0, "#{node_name},") if node_name
+    @path
+  end
+
+  def total_cost(stop)
+    graph.nodes[stop].weight
   end
 
   def visited
@@ -63,6 +108,11 @@ module Dijkstra
     not_visited_del(element)
   end
 
+end
 
+class Dij
+  include Dijkstra
+end
 
- end
+Dij.new.process "./data/my_graph.txt", "A", "G"
+
